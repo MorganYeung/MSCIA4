@@ -1,0 +1,165 @@
+---
+title: "Msci 446 Assignment 4"
+author: "Andy Yang, Tong Wu and Morgan Yeung"
+date: "4/6/2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+## Question 1: Classification using NNets
+In this question, you will train a classifier on https://tensorflow.rstudio.com/reference/keras/dataset_fashion_mnist/. The dataset contains 60000 train and 10000 test images each being 28x28 grey scale pixels. Check this page to see the details.
+
+###1.1. Get the data
+To get the data, you must run the below code. Once you do so, it will download to local folder and you won’t need download again.
+```{r}
+library('tidyverse')
+library(tensorflow)
+library(keras)
+mnist <- dataset_fashion_mnist()
+
+x_train <- mnist$train$x
+y_train <- mnist$train$y
+x_test <- mnist$test$x
+y_test <- mnist$test$y
+
+dim(x_train)
+dim(x_test)
+```
+```{r}
+trouser <- x_train[2,28:1,1:28]
+par(pty="s") # for keeping the aspect ratio 1:1
+image(t(trouser), col = gray.colors(256), axes = FALSE)
+print(y_train[2])
+```
+
+###1.2.Plot
+Using the train set, plot
+
+a trouser (class 1)
+a bag (class 8) and
+a an ankle boot (class 9)
+
+```{r}
+i = 1
+for (val in y_train){
+  if (val == 1){
+  trouser <- x_train[i,28:1,1:28]
+  break
+  }
+  i = i+1
+}
+
+par(pty="s") # for keeping the aspect ratio 1:1
+image(t(trouser), col = gray.colors(256), axes = FALSE)
+
+```
+```{r}
+i = 1
+for (val in y_train){
+  if (val == 8){
+  bag <- x_train[i,28:1,1:28]
+  break
+  }
+  i = i + 1
+}
+
+par(pty="s") # for keeping the aspect ratio 1:1
+image(t(bag), col = gray.colors(256), axes = FALSE)
+
+```
+
+```{r}
+i = 1
+for (val in y_train){
+  if (val == 9){
+  ankleboot <- x_train[i,28:1,1:28]
+  break
+  }
+  i = i + 1
+}
+par(pty="s") # for keeping the aspect ratio 1:1
+image(t(ankleboot), col = gray.colors(256), axes = FALSE)
+
+```
+
+
+###1.3 Process the dataset
+You will fit a Feed Forward Neural Network, that takes each data as flattened. That is, even though your data is two dimensional (28x28), you need to process the data into a 282x1 shape.
+
+As we discussed, neural networks prefers the data into some finite interval, e.g. 0 and 1. Your data, on the other hand, is formed by pixels, each of which can be an integer between 0 and 255. Make appropriate adjustments to satisfy the requirement.
+
+Also, you will fit a categorical classification model (non-binary) since there are 10 possible outputs. The network will have 10 nodes in the output layer. So you need to process your y values that fits the model output. To do this, you can use to_categorical(...) function of keras package.
+
+The outputs are not binary (0 and 1), they are categorical (i.e. 1,2 …,10). We need to process the output to the categorical:
+
+```{r}
+# reshape
+x_train <- array_reshape(x_train, c(nrow(x_train), 784))
+x_test <- array_reshape(x_test, c(nrow(x_test), 784))
+
+# rescale
+x_train <- x_train / 255
+x_test <- x_test / 255
+
+y_train <- to_categorical(y_train, 10)
+y_test  <- to_categorical(y_test, 10)
+
+head(y_train)
+```
+
+###1.4 Fit Shallow Network
+
+Fit a shallow neural network, that is a network having one input layer, one hidden layer and one output layer.
+The input shape must match the input data size,
+For the hidden layer, use 32, 128 or 256 hidden neurons,
+use relu or sigmoid activation function,
+Use softmax activation function in the output layer.
+To train the model, use
+categorical cross entropy loss,
+adam optimizer,
+use accuracy as metrics,
+use batch size = 128,
+use 0.2 for validation split.
+Train 10 epochs.
+Try the different values above for the number of hidden neurons (32,128 or 256) and different activation functions in hidden layer (relu or sigmoid). - Which of these settings performed the best in test accuracy? (Hint: your test accuracy must be greater than 0.88).
+```{r}
+model <- keras_model_sequential() 
+model %>% 
+  layer_dense(units = 20, activation = 'relu', input_shape = c(784)) %>% 
+  layer_dense(units = 10, activation = 'softmax')
+summary(model)
+model %>% compile(
+  loss = 'categorical_crossentropy',
+  optimizer = optimizer_adam(),
+  metrics = c('accuracy')
+)
+
+history <- model %>% fit(
+  x_train, y_train, 
+  epochs = 10, 
+  batch_size = 128, 
+  validation_split = 0.2
+
+```
+
+#### 1.5. Fit Deep Neural Network
+Fit a deep neural network, that is a network having more than one input layer, one hidden layer and one output layer.
+The input shape must match the input data size,
+For the hidden layers, use 32, 128 or 256 hidden neurons,
+use relu or sigmoid activation function,
+Use softmax activation function in the output layer.
+To train the model, use
+categorical cross entropy loss,
+adam optimizer,
+use accuracy as metrics,
+use batch size = 128,
+use 0.2 for validation split.
+Train 10 epochs.
+Report the model generated the best test accuracy?
+
+```{r}
+
+
+```
